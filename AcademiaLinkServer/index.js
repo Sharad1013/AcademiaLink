@@ -11,11 +11,12 @@ import connectDb from "./utils/db.js";
 
 // routes
 import authRoutes from "./routes/authRoutes.js";
-// import classroomRoutes from "./routes/classroomRoutes.js";
+import classroomRoutes from "./routes/classroomRoutes.js";
 
 const PORT = process.env.PORT;
 
 const allowedOrigins = [process.env.FRONTEND_URL];
+
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -29,6 +30,12 @@ app.use(
   })
 );
 
+// app.use(
+//   cors({
+//     origin: process.env.FRONTEND_URL,
+//     credentials: true,
+//   })
+// );
 app.use(bodyParser.json()); // express.json()
 app.use(
   cookieParser({
@@ -42,11 +49,8 @@ app.use(
 
 // routehandlers
 app.use("/auth", authRoutes);
-// app.use("/class", classroomRoutes);
+app.use("/class", classroomRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Hello from AcademiaLink");
-});
 
 // ensures that Server is up only if the DB connection is successful.
 connectDb()

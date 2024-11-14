@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -9,19 +10,93 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [role, setRole] = useState("student");
-
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const userData = { email, role };
-    login(userData);
-    navigate("/");
+  const handleProfilePictureChange = (e) => {
+    setProfilePicture(e.target.files[0]);
   };
 
-  const handleSendOtp = () => {
-    console.log(`OTP sent to: ${email}`);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    if (!name || !email || !password || !otp) {
+      toast.error("All fields are required");
+      return;
+    }
+  
+    try {
+      setLoading(true);
+  
+      // Create a FormData object to handle text and file data
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("otp", otp);
+      formData.append("role", role);
+  
+      if (profilePicture) {
+        formData.append("profilePicture", profilePicture); // Assuming `profilePicture` is the file from the file input
+      }
+  
+      const response = await fetch(
+        `${import.meta.env.VITE_APP_API_BASE_URL}/auth/register`,
+        {
+          method: "POST",
+          body: formData, // Send FormData instead of JSON
+          credentials: "include",
+        }
+      );
+  
+      const data = await response.json();
+      if (response.ok) {
+        toast.success("Registration Successful");
+        login({ email, role });
+        navigate("/");
+      } else {
+        toast.error(data.message || "Registration Failed");
+      }
+    } catch (error) {
+      toast.error("Error During Registration");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+  const handleSendOtp = async () => {
+    if (!email) {
+      toast.error("Please Enter Your Email");
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `${import.meta.env.VITE_APP_API_BASE_URL}/auth/sendotp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }), // Send the email as the body
+          credentials: "include", // Include cookies for CORS
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        toast.success("OTP sent Successfully");
+      } else {
+        toast.error(data.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Error Sending OTP");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -95,6 +170,7 @@ const Signup = () => {
             className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-purple-400"
             whileFocus={{ scale: 1.02 }}
           />
+
           <div className="email-otp-container flex space-x-2">
             <motion.input
               type="email"
@@ -108,11 +184,16 @@ const Signup = () => {
             <motion.button
               type="button"
               onClick={handleSendOtp}
-              className="send-otp-btn px-4 py-2 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition-colors duration-200 text-xs"
+              className="send-otp-btn flex items-center justify-center px-4 py-2 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition-colors duration-200 text-xs"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              disabled={loading} // Disables the button while loading
             >
-              Send OTP
+              {loading ? (
+                <div className="loader border-t-transparent border-white border-4 rounded-full w-4 h-4 animate-spin"></div>
+              ) : (
+                "Send OTP"
+              )}
             </motion.button>
           </div>
           <motion.input
@@ -133,6 +214,24 @@ const Signup = () => {
             className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-purple-400"
             whileFocus={{ scale: 1.02 }}
           />
+          {/* Profile Picture Upload Field */}
+          {/* Custom File Input */}
+          <div className="mb-4 flex flex-col items-center">
+            <label className="w-full px-4 py-2 text-center border border-gray-300 rounded-full bg-purple-500 text-white font-semibold cursor-pointer hover:bg-purple-600 transition duration-200">
+              <motion.input
+                type="file"
+                onChange={handleProfilePictureChange}
+                className="hidden"
+                accept="image/*"
+              />
+              {profilePicture ? profilePicture.name : "Upload Profile Picture"}
+            </label>
+            {profilePicture && (
+              <p className="text-gray-500 mt-2 text-sm">
+                Selected file: {profilePicture.name}
+              </p>
+            )}
+          </div>
           <motion.select
             value={role}
             onChange={(e) => setRole(e.target.value)}
@@ -141,6 +240,7 @@ const Signup = () => {
             <option value="teacher">Teacher</option>
             <option value="student">Student</option>
           </motion.select>
+
           <motion.button
             type="submit"
             className="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 rounded-full transition-colors duration-200"

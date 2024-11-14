@@ -2,18 +2,48 @@ import React, { useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const userData = { email, role: "student" };
-    login(userData);
-    navigate("/");
+    if (!email || !password) {
+      toast.error("Email and Password are required!!");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_APP_API_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Logged in successfully");
+        login(data.data);
+        navigate("/");
+      } else {
+        toast.error(data.message || "Login failed");
+      }
+    } catch (error) {
+      toast.error("An Error Occurred during login! Please try after sometime");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -75,6 +105,7 @@ const Login = () => {
             className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-full transition-colors duration-200"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={handleSubmit}
           >
             Login
           </motion.button>

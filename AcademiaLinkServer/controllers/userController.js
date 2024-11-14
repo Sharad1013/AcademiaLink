@@ -15,6 +15,7 @@ export const registerUser = async (req, res) => {
     }
 
     if (password.length < 6) {
+      `11q23ed`;
       return responseFunction(
         res,
         400,
@@ -24,8 +25,9 @@ export const registerUser = async (req, res) => {
       );
     }
 
+    console.log(name);
     //cloudinary
-    const profilePicture = req.file ? req.file.path : " ";
+    const profilePicture = req.file ? req.file.path : undefined;
 
     let user = await User.findOne({ email });
     let verificationQueue = await Verification.findOne({ email });
@@ -139,6 +141,14 @@ export const loginUser = async (req, res) => {
       secure: true,
       sameSite: "none",
     });
+
+    return responseFunction(
+      res,
+      200,
+      "Login successful",
+      { user, authToken, refreshToken },
+      true
+    );
   } catch (error) {
     console.log(error);
     return responseFunction(res, 500, "Internal Server Error", error, false);
@@ -146,6 +156,7 @@ export const loginUser = async (req, res) => {
 };
 
 export const checkLogin = async (req, res, next) => {
+  // console.log("check login ", req.message);
   res.json({
     ok: req.ok,
     message: req.message,
@@ -153,17 +164,16 @@ export const checkLogin = async (req, res, next) => {
   });
 };
 
-export const getUser = async (req, res) => {
+export const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId).select("-password");
 
     if (!user) {
-      return responseFunction(res, 400, "User not Found", null, false);
+      return responseFunction(res, 404, "User not found", null, false);
     }
-
-    return responseFunction(res, 200, "User Found", user, true);
-  } catch (error) {
-    return responseFunction(res, 500, "Internal Server Error", error, false);
+    return responseFunction(res, 200, "User found", user, true);
+  } catch (err) {
+    return responseFunction(res, 500, "Internal server error", err, false);
   }
 };
 
