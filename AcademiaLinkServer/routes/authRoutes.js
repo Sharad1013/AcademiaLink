@@ -12,9 +12,11 @@ import {
   logoutUser,
 } from "../controllers/userController.js";
 import sendOtp from "../controllers/otpController.js";
-import { singleUpload } from "../utils/cloudinaryConfig.js";
+import { uploadProfilePicture } from "../utils/cloudinaryConfig.js";
 import authTokenHandler from "../middlewares/checkAuthToken.js";
 import { User } from "../models/userModel.js";
+
+
 // nodemailer function
 const mailer = async (receiverMail, code) => {
   let transporter = nodemailer.createTransport({
@@ -31,7 +33,7 @@ const mailer = async (receiverMail, code) => {
   let info = await transporter.sendMail({
     from: "AcademiaLink",
     to: receiverMail,
-    subject: `OTP for classroom`,
+    subject: `OTP for AcademiaLink classroom`,
     text: `Your OTP is ${code}`,
     html: `<b>Your OTP is ${code} </b>`,
   });
@@ -79,11 +81,13 @@ router.post("/sendotp", async (req, res, next) => {
 });
 
 // Authentication
-router.post("/register", singleUpload, registerUser);
+router.post("/register", uploadProfilePicture, registerUser);
 router.post("/login", loginUser);
 router.get("/checklogin", authTokenHandler, checkLogin);
 
 // fetch user details
 router.get("/getuser", authTokenHandler, getUser);
 router.get("/logout", authTokenHandler, logoutUser);
+
+
 export default router;

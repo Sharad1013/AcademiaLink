@@ -16,10 +16,11 @@ const ClassroomSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    students: [
+    students: [String],
+    posts: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Post", // reference to the postmodel added later
       },
     ],
   },

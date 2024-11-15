@@ -9,14 +9,17 @@ import {
 } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
-import HomePage from "./pages/Homepage";
+import HomePage from "./pages/HomePage";
+
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 import ProfilePage from "./pages/ProfilePage";
+import ClassesDetails from "./pages/ClassesDetails";
 
 const ProtectedRoute = ({ children }) => {
   const { auth, login } = useAuth();
@@ -83,6 +86,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/classes/:classid"
+            element={
+              <ProtectedRoute>
+                <ClassesDetails />
               </ProtectedRoute>
             }
           />

@@ -69,7 +69,6 @@ const ProfilePage = () => {
       );
 
       const data = await response.json();
-      console.log(data);
       if (response.ok) {
         setClassroomsJoinedByMe(data.data);
       }
@@ -81,7 +80,7 @@ const ProfilePage = () => {
   useEffect(() => {
     if (user) {
       fetchClassrooms();
-      //   fetchClassroomsJoinedByMe();
+      fetchClassroomsJoinedByMe();
     }
   }, [user]);
 
@@ -164,7 +163,9 @@ const ProfilePage = () => {
                 {user.name}
               </motion.h2>
               <p className="text-gray-600 text-lg ">Email: {user.email}</p>
-              <p className="text-gray-600 text-lg">Role: {user.role.toUpperCase()}</p>
+              <p className="text-gray-600 text-lg">
+                Role: {user.role.toUpperCase()}
+              </p>
               {user.role === "teacher" && (
                 <motion.button
                   className="create-classroom-btn mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-lg rounded-lg shadow-lg hover:scale-105 transform transition"
@@ -261,7 +262,7 @@ const ProfilePage = () => {
               </table>
             </motion.div>
           )}
-          {user.role === "student" && (
+          {/* {user.role === "student" && ( */}
             <motion.div
               className="classroom-list bg-white p-8 rounded-xl shadow-xl max-w-4xl mx-auto mt-8"
               initial={{ opacity: 0, y: 20 }}
@@ -301,7 +302,7 @@ const ProfilePage = () => {
                 </tbody>
               </table>
             </motion.div>
-          )}
+          {/* )} */}
         </>
       ) : (
         <p className="text-center text-gray-500 text-lg mt-6">

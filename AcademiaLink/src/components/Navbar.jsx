@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
+import SearchPopup from "./SearchPopup";
 
 const Navbar = () => {
   const { auth, logout } = useAuth();
+
+  const [showPopup, setShowPopup] = useState(false);
+  const togglePopup = () => {
+    setShowPopup(!showPopup);
+  };
 
   return (
     <motion.nav
@@ -14,7 +20,9 @@ const Navbar = () => {
       className="flex justify-between items-center py-4 px-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg"
     >
       {/* Left Side: Logo and Search */}
-      <div className="navbar-left flex items-center space-x-4">
+      <motion.div className="navbar-left flex items-center space-x-4">
+        {/* Existing Logo and Search Icon */}
+
         <motion.div
           whileHover={{ scale: 1.1 }}
           transition={{ type: "spring", stiffness: 300 }}
@@ -45,24 +53,21 @@ const Navbar = () => {
           </NavLink>
         </motion.div>
 
+        {/* Search Icon */}
         <motion.div
-          className="relative"
+          className="relative flex items-center justify-center"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          <input
-            type="text"
-            placeholder="Search Classrooms"
-            className="search-input pl-10 pr-4 py-2 rounded-full bg-white text-gray-800 placeholder-gray-400 shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-300"
-          />
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="size-6 w-5 h-5 text-gray-400 absolute top-2.5 left-3"
+            className="size-6 w-5 h-5 text-gray-400 absolute top-1/2 transform -translate-y-1/2 left-3 cursor-pointer"
+            onClick={togglePopup}
           >
             <path
               strokeLinecap="round"
@@ -70,13 +75,41 @@ const Navbar = () => {
               d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
             />
           </svg>
+          {showPopup && <SearchPopup onClose={togglePopup} />}
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Right Side: Profile / Login */}
-      <div className="navbar-right flex items-center space-x-4">
+      <motion.div className="navbar-right flex items-center space-x-4">
         {auth?.user ? (
           <>
+            {/* Home Link - Added here */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <NavLink
+                to="/"
+                className="text-xl font-semibold hover:text-yellow-300 flex items-center space-x-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 9l9-7 9 7M4 10v10a1 1 0 001 1h14a1 1 0 001-1V10M9 21H5a2 2 0 01-2-2V10a2 2 0 012-2h14a2 2 0 012 2v9a2 2 0 01-2 2h-4"
+                  />
+                </svg>
+                <span>Home</span>
+              </NavLink>
+            </motion.div>
+
             <motion.div
               whileHover={{ scale: 1.1 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -125,7 +158,7 @@ const Navbar = () => {
             </NavLink>
           </motion.div>
         )}
-      </div>
+      </motion.div>
     </motion.nav>
   );
 };
